@@ -7,15 +7,20 @@ cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurfac
 listImages = dir('*.png');
 
 ImRef = imread(listImages(62).name);
+%ImRef = imread(listImages(1).name);
 
 %%
 % figure
 % hi = imagesc(imDiff);
-clear dr imTL
+hsurf = figure; hold on
+ view(10,15)
+clear dr imTL drTime
 wtmplt = 10;
 wRef = 2*wtmplt;
 tic
-for it =  26 % 1 : 66
+for it =  24:26%1 : 5 : 66
+    cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurface\imseqBeadDrop_cutrot')
+
     fprintf('current images being analysed: %0.0f \n',it)
     clear dr
 im       = imread(listImages(it).name);
@@ -27,7 +32,7 @@ iiy = 0;
 for ix =   200 : 1 : 700  %200 : 10 : 700
     iix = iix + 1;
     iiy = 0;
-    for iy = 250 : 350%  250 : 1 : 500  %250 : 10 : 1000
+    for iy = 250 : 260 %350%  250 : 1 : 500  %250 : 10 : 1000
         iiy = iiy + 1;
         [dx,dy,c] = fastCrossCorr(im,ImRef,ix,iy,wtmplt,wRef);
         dr(iiy,iix).x  = ix;
@@ -43,10 +48,66 @@ end
 % hi.CData = imDiff;
 % pause(.2)
 
+drTime(it).dr = dr;
+
+ clear fhat fx fy
+ for iy = 1 : size(dr,1)
+     for ix = 1 : size(dr,2)
+         fx(iy,ix) = dr(iy,ix).dx;
+         fy(iy,ix) = dr(iy,ix).dy;
+     end
+ end
+ cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurface\weFunction\integratedgradient')
+fhat = intgrad2(fx,fy);
+drTime(it).fhat = fhat;
+
+% if it == 1
+figure(hsurf)
+ hs = surf(fhat,'edgecolor','none');
+% else
+%     hs.CData = fhat;
+% end
+
+title(sprintf('time is : %0.0f',it))
+pause(.1)
 end
 toc
-
 fprintf('correlation finished \n')
+
+
+%% integrate the gradient
+cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurface\weFunction\integratedgradient')
+
+% fhat = intgrad2(fx,fy)
+
+%  xp = 0:.1:1;
+%  yp = [0 .1 .2 .4 .8 1];
+%  [x,y]=meshgrid(xp,yp);
+%  f = exp(x+y) + sin((x-2*y)*3);
+%  [fx,fy]=gradient(f,.1,yp);
+%  tic,fhat = intgrad2(fx,fy,.1,yp,1);toc
+
+% Example usage 2: Large grid, 101x101
+ xp = 0:.01:1;
+ yp = 0:.01:1;
+ [x,y]=meshgrid(xp,yp);
+ f = exp(x+y) + sin((x-2*y)*3);
+ [fx,fy]=gradient(f,.01);
+ tic,fhat = intgrad2(fx,fy,.01,.01,1);toc
+
+ %%
+ clear hs
+cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurface\weFunction\integratedgradient')
+hsurf = figure; hold on, box on
+view(-11,23)
+for it =  1 : 1 : 66
+    if exist('hs')
+        hs.FaceAlpha = .4;
+    end
+   figure(hsurf)
+   hs = surf(drTime(it).fhat,'edgecolor','none');
+   pause(.4)
+end
 
 %%
 figure
@@ -76,6 +137,8 @@ clims = [-10 10];
 figure
 imagesc(imDY,clims)
 
+figure
+plot(imDX(50,:))
 %%
 % build sample image
 tmplt    = imcrop(im,    [ix-wtmplt iy-wtmplt 2*wtmplt-1 2*wtmplt-1]);
