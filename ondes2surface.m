@@ -6,6 +6,57 @@ close all, clear all
 % 
 % PIVlab
 % https://blog.espci.fr/mecaflu/files/2019/02/PIVlab_tuto.pdf
+
+
+%% launch PIVlab_GUI
+%% read results
+%% run fhat = intgrad2(U,V)
+ %%
+cd('C:\Users\darcy\Desktop\TP_Image')
+load('set02_movie01_all_frames.mat')
+figure
+U =  u_original{40, 1} ;
+V =  v_original{40, 1} ;
+quiver(U,V)
+%%
+
+figure, box on, hold on
+set(gcf,'position',[680         203        1193         775])
+view(-14,43)
+for it = 1 : 1 : size(u_original,1)
+    if exist('hs')
+        delete(hs)
+    end
+    U =  u_original{it, 1} ;
+    V =  v_original{it, 1} ;
+    
+    % remove the NaNs
+    U(find(isnan(U))) = 0;     
+    V(find(isnan(V))) = 0;
+    
+    fhat = intgrad2(U,V);
+    h0 = 40; % (mm)
+    h = sqrt(h0^2 - ( 2/0.25 ) * fhat );
+    hs = surf(h,'edgecolor','none');
+    title(sprintf('time: %0.0f',it))
+    pause(.2)
+end
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% OLD STUFF 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %% generate image sequence for PIVlab
 
 
@@ -114,30 +165,6 @@ cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurfac
  [fx,fy]=gradient(f,.01);
  tic,fhat = intgrad2(fx,fy,.01,.01,1);toc
 
- %%
-cd('C:\Users\darcy\Desktop\TP_Image')
-load('set02_movie01_all_frames.mat')
-figure
-U =  u_original{40, 1} ;
-V =  v_original{40, 1} ;
-quiver(U,V)
-%%
-
-figure, box on, hold on
-set(gcf,'position',[680         203        1193         775])
-view(-14,43)
-for it = 1 : size(u_original,1)
-    if exist('hs')
-        delete(hs)
-    end
-    U =  u_original{it, 1} ;
-    V =  v_original{it, 1} ;
-    U(find(isnan(U))) = 0;     V(find(isnan(V))) = 0;
-    fhat = intgrad2(U,V);
-    hs = surf(fhat,'edgecolor','none');
-    title(sprintf('time: %0.0f',it))
-    pause(.2)
-end
 
 %%
 
