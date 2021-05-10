@@ -2,12 +2,12 @@ close all, clear all
 
 %%
 
-
+% define folder
 cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurface\imseqBeadDrop_cutrot')
-listImages = dir('*.png');
 
+% load images
+listImages = dir('*.png');
 ImRef = imread(listImages(62).name);
-%ImRef = imread(listImages(1).name);
 
 %%
 % figure
