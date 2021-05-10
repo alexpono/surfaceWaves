@@ -1,5 +1,24 @@
 close all, clear all
 
+% documents
+% 
+% inverse integrate gradient : https://fr.mathworks.com/matlabcentral/fileexchange/9734-inverse-integrated-gradient
+% 
+% PIVlab
+% https://blog.espci.fr/mecaflu/files/2019/02/PIVlab_tuto.pdf
+%% generate image sequence for PIVlab
+
+
+iFolder = 'C:\Users\darcy\Desktop\TP_Image\set02\movie01';
+oFolder = 'C:\Users\darcy\Desktop\TP_Image\set02\movie014PIVlab';
+mkdir(oFolder)
+cd(iFolder)
+listIm = dir('*.tif')
+cd(oFolder)
+for i = 1 : length(listIm) 
+    
+end
+
 %%
 
 % define folder
@@ -95,6 +114,90 @@ cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurfac
  [fx,fy]=gradient(f,.01);
  tic,fhat = intgrad2(fx,fy,.01,.01,1);toc
 
+ %%
+cd('C:\Users\darcy\Desktop\TP_Image')
+load('set02_movie01_all_frames.mat')
+figure
+U =  u_original{40, 1} ;
+V =  v_original{40, 1} ;
+quiver(U,V)
+%%
+
+figure, box on, hold on
+set(gcf,'position',[680         203        1193         775])
+view(-14,43)
+for it = 1 : size(u_original,1)
+    if exist('hs')
+        delete(hs)
+    end
+    U =  u_original{it, 1} ;
+    V =  v_original{it, 1} ;
+    U(find(isnan(U))) = 0;     V(find(isnan(V))) = 0;
+    fhat = intgrad2(U,V);
+    hs = surf(fhat,'edgecolor','none');
+    title(sprintf('time: %0.0f',it))
+    pause(.2)
+end
+
+%%
+
+%% browse results
+
+figure, box on, hold on
+set(gcf,'position',[680         203        1193         775])
+view(-14,43)
+for it = 1 : size(u_original,1)
+    while(1)
+    if exist('hs')
+        delete(hs)
+    end
+    U =  u_original{it, 1} ;
+    V =  v_original{it, 1} ;
+    U(find(isnan(U))) = 0;     V(find(isnan(V))) = 0;
+    fhat = intgrad2(U,V);
+    hs = surf(fhat,'edgecolor','none');
+    title(sprintf('time: %0.0f',it))
+
+    end
+end
+
+
+him = figure('defaultAxesFontSize',20); hold on, box on
+
+
+while contains('azesdxcr',get(gcf,'currentchar'))  % which gets changed when key is pressed
+   figure(him)
+   [x,y] = ginput(1);
+   if get(gcf,'currentchar')=='z'
+       iz = iz -  1;
+   elseif get(gcf,'currentchar')=='e'
+       iz = iz +  1;
+   end
+   
+   clear xCH yCH
+   xCH = [];
+   yCH = [];
+   for ich = 1 : length(channels)
+       idx = find(iz == channels(ich).z);
+       if idx
+           xCH(ich) = channels(ich).x(idx);
+           yCH(ich) = channels(ich).y(idx);
+       end
+   end
+   
+   
+   figure(him), hold on
+   im2D = im3D(:,:,iz);
+   him2D.CData = im2D;
+   axis(gca,[xAxis(1) xAxis(2) yAxis(1) yAxis(2)])
+   hCH.XData = xCH;
+   hCH.YData = yCH;
+   %set(gcf,'position',[100 100 1000 1000])
+   title(sprintf('z: %0.0f',iz))
+   figure(hminiMap)
+   hp.Vertices(:,3) = iz * [1,1,1,1,1];
+
+end
  %%
  clear hs
 cd('C:\Users\Lenovo\Jottacloud\ENSEIGNEMENT\2020_2021\L3_TP_images\ondesDeSurface\weFunction\integratedgradient')
